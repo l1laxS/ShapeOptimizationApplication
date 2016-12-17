@@ -125,7 +125,7 @@ public:
     ///@{
 
     /// Default constructor.
-    Nurbs(int& grade)
+    Nurbs(int grade)
     {
     	degree=grade;
     }
@@ -326,6 +326,8 @@ public:
     	{
     		dN = dN + e2*N(t, i+1, p-1);
     	}
+
+    	return dN;
     }
 
 
