@@ -90,7 +90,6 @@ public:
     typedef boost::python::extract<double> takeDouble;
     typedef boost::python::extract<int> takeInt;
     typedef boost::python::extract<bool> takeBool;
-    typedef std::vector<controlPoint> controlPointVcr;
     typedef std::vector<int> IntVector;
 
     /// Pointer definition of ControlPoint

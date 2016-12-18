@@ -95,7 +95,7 @@ public:
     typedef boost::python::extract<double> takeDouble;
     typedef boost::python::extract<int> takeInt;
     typedef boost::python::extract<bool> takeBool;
-    typedef std::vector<controlPoint> controlPointVcr;
+//    typedef std::vector<ControlPoint> controlPointVcr;
     typedef std::vector<int> IntVector;
 //    static PyObject *;
 
@@ -145,7 +145,7 @@ public:
     	    		DoubleVector knot_vector_v;
     	    		int p;
     	    		int q;
-    	    		controlPointVcr control_points;
+//    	    		controlPointVcr control_points;
 
     	    		// 2. create "ingredients" ======================================
     	    		// fill in knot_vector_u
@@ -161,8 +161,8 @@ public:
     	    		// fill in control_points
 
     	    		// 3. create patch  =============================================
-    	    		patch = Patch(knot_vector_u, knot_vector_v, p, q, control_points);
-    	    		patches.push_back(patch)
+//    	    		auto patch = new Patch(knot_vector_u, knot_vector_v, p, q, control_points);
+//    	    		patches.push_back(patch)
     	    	}
 //        KRATOS_TRY;
 
