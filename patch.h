@@ -44,8 +44,8 @@
 //
 // ==============================================================================
 
-#ifndef IBRA_MAPPER_H
-#define IBRA_MAPPER_H
+#ifndef PATCH_H
+#define PATCH_H
 
 // ------------------------------------------------------------------------------
 // System includes
@@ -72,19 +72,41 @@
 #include "../../kratos/includes/element.h"
 #include "../../kratos/includes/model_part.h"
 #include "../../kratos/includes/kratos_flags.h"
+#include "control_point.h"
 #include "shape_optimization_application.h"
-#include "patch.h"
 // ==============================================================================
 
 namespace Kratos
 {
-class IBRAMapper
+
+///@name Kratos Globals
+///@{
+
+///@}
+///@name Type Definitions
+///@{
+
+
+///@}
+///@name  Enum's
+///@{
+
+///@}
+///@name  Functions
+///@{
+
+///@}
+///@name Kratos Classes
+///@{
+
+/// Short class definition.
+/** Detail class definition.
+
+*/
+
+class Patch
 {
 public:
-    ///@name Type Definitions
-    ///@{
-
-
     // ==========================================================================
     // Type definitions for linear algebra including sparse systems
     // ==========================================================================
@@ -97,185 +119,88 @@ public:
     typedef boost::python::extract<bool> takeBool;
     typedef std::vector<controlPoint> controlPointVcr;
     typedef std::vector<int> IntVector;
-//    static PyObject *;
 
-    /// Pointer definition of IBRAMapper
-    KRATOS_CLASS_POINTER_DEFINITION(IBRAMapper);
-
-    ///@}
-    ///@name Life Cycle
-    ///@{
+    /// Pointer definition of Patch
+    KRATOS_CLASS_POINTER_DEFINITION(Patch);
 
     /// Default constructor.
-    IBRAMapper( ModelPart& model_part,
-    		boost::python::dict self)
-		: mr_model_part(model_part),
-          myPythondict(self)
+    Patch(std::vector<double&> knot_vector_u,
+    	  std::vector<double&> knot_vector_v,
+		  int p, int q,
+		  std::vector<ControlPoint&> control_points):
+			  knot_vector_u(knot_vector_u),
+			  knot_vector_v(knot_vector_v),
+			  p(p), q(q),
+			  control_points(control_points)
     {
-        // Initialize filter matrix
-        //m_mapping_matrix.resize(m_number_of_design_variables*3,m_number_of_design_variables);
-
     }
 
     /// Destructor.
-    virtual ~IBRAMapper()
+    virtual ~Patch()
     {
     }
 
-
     // ==============================================================================
-    void compute_mapping_matrix()
+    // returns the value of the NURBS function given the parameters
+    void R(int i, int j, int p, int q, double u, double v)
     {
-        KRATOS_TRY;
+    	//
+    };
 
-//        VectorType knot_vector = ZeroVector(3);
+    // returns the value of the NURBS derivative given the parameters
+    void dR(int i, int j, int p, int q, double u, double v)
+    {
+    	//
+    };
 
-        double test;
+    // returns the coordinates of the point given the parameters
+    void S(double& x, double& y, double& z, double u, double v)
+    {
 
-        DoubleVector coordinates;
-        controlPointVcr myControlPoint;
-        IntVector degree;
-        DoubleVector knotVector;
-
-
-
-
-        for( int k = 0; k < 9; k++)
-        {
-
-        	std::cout << "checkmark 100" << std::endl;
-
-        	int list_length = boost::python::len(myPythondict["faces"]);
-
-
-
-
-
-        	std::cout << "list_length = " << list_length << std::endl;
-
-
-
-
-
-
-
-
-        	takeInt ID(myPythondict["faces"][0]["surface"][0]["control_points"][k][0]);
-
-        	for(int i = 0; i < 3; i++)
-        	{
-        		std::cout << "Porco dio nel secondo for" << std::endl;
-        	  	double myCoord = takeDouble (myPythondict["faces"][0]["surface"][0]["control_points"][0][k][1][i]);
-        	   	coordinates.push_back( myCoord );
-        	}
-
-        	double weight = takeDouble (myPythondict["faces"][0]["surface"][0]["control_points"][0][k][1][3]);
-
-        	controlPoint controlPointFromJson( coordinates, weight, ID);
-        	myControlPoint.push_back( controlPointFromJson );
-
-        }
-
-        for(int k = 0; k < 2; k++)
-        {
-        	int deg = takeInt (myPythondict["faces"][0]["surface"][0]["degree"][k]);
-        	degree.push_back( deg );
-        }
-
-//        bool is_rational = takeBool (myPythondict["faces"][0]["surface"][0]["is_rational"]);
-//        bool is_trimmed = takeBool (myPythondict["faces"][0]["surface"][0]["is_trimmed"]);
-
-        for(int i = 0; i < 2; i++)
-        {
-        	for(int k = 0; k < 6; k++)
-        	{
-        		double knot = takeDouble (myPythondict["faces"][0]["surface"][0]["knot_vectors"][i][k]);
-        		knotVector.push_back( knot );
-        		std::cout << "Knot " << knot << std::endl;
-        	}
-        }
-
-
-//        double test = boost::python::extract<double> (myPythondict["faces"]);
-//
-//        std::cout<<"Test1 " << test << std::endl;
-
-
-//        int i=0;
-//        while (i < myPythondict["knot_vector"].attr("length") )
-//       {
-//        	boost::python::extract<double> test2 (myPythondict["knot_vector"][i]);
-//        	std::cout <<"vector test " << test2 << std::endl;
-//        	i++;
-//       }
-
-//        boost::python::extract<const double *> test2 (myPythondict["knot_vector"]);
-//
-//        std::cout<<"vector test " << test2 << std::endl;
-
-
-
-
-//        string test2;
-//
-//        boost::python::extract<const char*> test2(myPythondict["loop"]);
-//
-//        std::cout<<"Test2 " << test2 << std::endl;
-//
-//        boost::python::extract<double> test3(myPythondict["knot_vector"][0]);
-//        std::cout << "Test3 " << test3 << std::endl;
-//
-//        boost::python::extract<Vec2&> test4(myPythondict["knot_vector"]);
-//        std::cout<<"Test4 " << test4 << std::endl;
-//        KRATOS_WATCH(test4);
-
-//        KRATOS_WATCH(knot_vector);
-
-        KRATOS_CATCH("");
     }
 
-//    evaluat
-
     // ==============================================================================
-
     /// Turn back information as a string.
     virtual std::string Info() const
     {
-        return "IBRAMapper";
+        return "Patch";
     }
 
+    // ==============================================================================
     /// Print information about this object.
     virtual void PrintInfo(std::ostream& rOStream) const
     {
-        rOStream << "IBRAMapper";
+        rOStream << "Patch";
     }
 
+    // ==============================================================================
     /// Print object's data.
     virtual void PrintData(std::ostream& rOStream) const
     {
     }
 
-
 private:
     // ==============================================================================
     // Initialized by class constructor
     // ==============================================================================
-    ModelPart& mr_model_part;
-    boost::python::dict myPythondict;
+    std::vector<double> knot_vector_u;
+    std::vector<double> knot_vector_v;
+    int p;
+    int q;
+    std::vector<ControlPoint> control_points;
 
     // ==============================================================================
     // General working arrays
     // ==============================================================================
-    std::vector<Patch> patches;
-    SparseMatrixType m_mapping_matrix;
-
     /// Assignment operator.
-//      IBRAMapper& operator=(IBRAMapper const& rOther);
+//      Patch& operator=(Patch const& rOther);
 
     /// Copy constructor.
-//      IBRAMapper(IBRAMapper const& rOther);
+//      Patch(Patch const& rOther);
 
-}; // Class IBRAMapper
+
+}; // Class Patch
+
 }  // namespace Kratos.
 
-#endif // IBRA_MAPPER_H
+#endif // PATCH_H
