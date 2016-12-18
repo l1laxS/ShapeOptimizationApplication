@@ -112,9 +112,6 @@ public:
 		: mr_model_part(model_part),
           myPythondict(self)
     {
-        // Initialize filter matrix
-        //m_mapping_matrix.resize(m_number_of_design_variables*3,m_number_of_design_variables);
-
     }
 
     /// Destructor.
@@ -122,78 +119,105 @@ public:
     {
     }
 
+    void initialize_patches()
+    {
+    	// loop over faces
+    	for(int i=0; i < boost::python::len(myPythondict["faces"]); i++)
+    	{
+    		std::cout << "face: " << i << std::endl;
+
+    	}
+    }
+
 
     // ==============================================================================
     void compute_mapping_matrix()
     {
-        KRATOS_TRY;
+    	// loop over faces
+    	    	for(int i=0; i < boost::python::len(myPythondict["faces"]); i++)
+    	    	{
+    	    		std::cout << "face: " << i << std::endl;
+
+    	    		// each face is a patch: myPythondict["faces"][i]
+
+    	    		// 1. initialize "ingredients" ==================================
+    	    		DoubleVector knot_vector_u;
+    	    		DoubleVector knot_vector_v;
+    	    		int p;
+    	    		int q;
+    	    		controlPointVcr control_points;
+
+    	    		// 2. create "ingredients" ======================================
+    	    		// fill in knot_vector_u
+    	    		// for(int u_idx = 0; u_idx < boost::python::len(myPythondict["faces"][i]["surface"][""]))
+    	    		{
+    	    			//
+    	    			// knot_vector_u.push_back();
+    	    		}
+    	    		// fill in knot_vector_v
+
+    	    		// get p and q
+
+    	    		// fill in control_points
+
+    	    		// 3. create patch  =============================================
+    	    		patch = Patch(knot_vector_u, knot_vector_v, p, q, control_points);
+    	    		patches.push_back(patch)
+    	    	}
+//        KRATOS_TRY;
 
 //        VectorType knot_vector = ZeroVector(3);
 
-        double test;
+//        double test;
+//
+//        DoubleVector coordinates;
+//        controlPointVcr myControlPoint;
+//        IntVector degree;
+//        DoubleVector knotVector;
+//
+//        for( int k = 0; k < 9; k++)
+//        {
+//
+//        	std::cout << "checkmark 100" << std::endl;
+//
+//        	int list_length = boost::python::len(myPythondict["faces"]);
 
-        DoubleVector coordinates;
-        controlPointVcr myControlPoint;
-        IntVector degree;
-        DoubleVector knotVector;
+//        	std::cout << "list_length = " << list_length << std::endl;
 
+//        	takeInt ID(myPythondict["faces"][0]["surface"][0]["control_points"][k][0]);
+//
+//        	for(int i = 0; i < 3; i++)
+//        	{
+//        		std::cout << "Porco dio nel secondo for" << std::endl;
+//        	  	double myCoord = takeDouble (myPythondict["faces"][0]["surface"][0]["control_points"][0][k][1][i]);
+//        	   	coordinates.push_back( myCoord );
+//        	}
+//
+//        	double weight = takeDouble (myPythondict["faces"][0]["surface"][0]["control_points"][0][k][1][3]);
+//
+//        	controlPoint controlPointFromJson( coordinates, weight, ID);
+//        	myControlPoint.push_back( controlPointFromJson );
+//
+//        }
 
-
-
-        for( int k = 0; k < 9; k++)
-        {
-
-        	std::cout << "checkmark 100" << std::endl;
-
-        	int list_length = boost::python::len(myPythondict["faces"]);
-
-
-
-
-
-        	std::cout << "list_length = " << list_length << std::endl;
-
-
-
-
-
-
-
-
-        	takeInt ID(myPythondict["faces"][0]["surface"][0]["control_points"][k][0]);
-
-        	for(int i = 0; i < 3; i++)
-        	{
-        		std::cout << "Porco dio nel secondo for" << std::endl;
-        	  	double myCoord = takeDouble (myPythondict["faces"][0]["surface"][0]["control_points"][0][k][1][i]);
-        	   	coordinates.push_back( myCoord );
-        	}
-
-        	double weight = takeDouble (myPythondict["faces"][0]["surface"][0]["control_points"][0][k][1][3]);
-
-        	controlPoint controlPointFromJson( coordinates, weight, ID);
-        	myControlPoint.push_back( controlPointFromJson );
-
-        }
-
-        for(int k = 0; k < 2; k++)
-        {
-        	int deg = takeInt (myPythondict["faces"][0]["surface"][0]["degree"][k]);
-        	degree.push_back( deg );
-        }
+//        for(int k = 0; k < 2; k++)
+//        {
+//        	int deg = takeInt (myPythondict["faces"][0]["surface"][0]["degree"][k]);
+//        	degree.push_back( deg );
+//        }
 
 //        bool is_rational = takeBool (myPythondict["faces"][0]["surface"][0]["is_rational"]);
 //        bool is_trimmed = takeBool (myPythondict["faces"][0]["surface"][0]["is_trimmed"]);
 
-        for(int i = 0; i < 2; i++)
-        {
-        	for(int k = 0; k < 6; k++)
-        	{
-        		double knot = takeDouble (myPythondict["faces"][0]["surface"][0]["knot_vectors"][i][k]);
-        		knotVector.push_back( knot );
-        		std::cout << "Knot " << knot << std::endl;
-        	}
-        }
+//        for(int i = 0; i < 2; i++)
+//        {
+//        	for(int k = 0; k < 6; k++)
+//        	{
+//        		double knot = takeDouble (myPythondict["faces"][0]["surface"][0]["knot_vectors"][i][k]);
+//        		knotVector.push_back( knot );
+//        		std::cout << "Knot " << knot << std::endl;
+//        	}
+//        }
 
 
 //        double test = boost::python::extract<double> (myPythondict["faces"]);
@@ -231,7 +255,7 @@ public:
 
 //        KRATOS_WATCH(knot_vector);
 
-        KRATOS_CATCH("");
+//        KRATOS_CATCH("");
     }
 
 //    evaluat
