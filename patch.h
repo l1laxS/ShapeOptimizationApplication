@@ -124,8 +124,8 @@ public:
     KRATOS_CLASS_POINTER_DEFINITION(Patch);
 
     /// Default constructor.
-    Patch(std::vector<double&> knot_vector_u,
-    	  std::vector<double&> knot_vector_v,
+    Patch(DoubleVector& knot_vector_u,
+    	  DoubleVector& knot_vector_v,
 		  int p, int q,
 		  std::vector<ControlPoint&> control_points):
 			  knot_vector_u(knot_vector_u),
@@ -183,11 +183,11 @@ private:
     // ==============================================================================
     // Initialized by class constructor
     // ==============================================================================
-    std::vector<double> knot_vector_u;
-    std::vector<double> knot_vector_v;
+    DoubleVector knot_vector_u;
+    DoubleVector knot_vector_v;
     int p;
     int q;
-    std::vector<ControlPoint> control_points;
+    controlPointVcr control_points;
 
     // ==============================================================================
     // General working arrays
