@@ -25,11 +25,12 @@ model_part_io = ModelPartIO("FEM_mesh")
 model_part_io.ReadModelPart(fe_model_part)
 
 # Read CAD model
-path = "/home/giovanni/workspace/kratos/applications/ShapeOptimizationApplication/test_examples/CAD_reconstruction/simple_example_geometry.json"
+#path = "simple_example_geometry.json"
+path = "hock_geometry.json"
 face = None
 with open(path) as data_file:
-    data = json.load(data_file_
-#    pprint(data)
+    data = json.load(data_file)
+    pprint(data)
 
 mapper = IBRAMapper(fe_model_part,data)
 

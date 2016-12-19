@@ -74,6 +74,7 @@
 #include "../../kratos/includes/kratos_flags.h"
 #include "shape_optimization_application.h"
 #include "patch.h"
+#include "control_point.hpp"
 // ==============================================================================
 
 namespace Kratos
@@ -95,7 +96,7 @@ public:
     typedef boost::python::extract<double> takeDouble;
     typedef boost::python::extract<int> takeInt;
     typedef boost::python::extract<bool> takeBool;
-//    typedef std::vector<ControlPoint> controlPointVcr;
+    typedef std::vector<ControlPoint> controlPointVcr;
     typedef std::vector<int> IntVector;
 //    static PyObject *;
 
@@ -136,7 +137,7 @@ public:
     	// loop over faces
     	    	for(int i=0; i < boost::python::len(myPythondict["faces"]); i++)
     	    	{
-    	    		std::cout << "face: " << i << std::endl;
+//    	    		std::cout << "face: " << i << std::endl;
 
     	    		// each face is a patch: myPythondict["faces"][i]
 
@@ -145,24 +146,76 @@ public:
     	    		DoubleVector knot_vector_v;
     	    		int p;
     	    		int q;
-//    	    		controlPointVcr control_points;
+    	    		controlPointVcr control_points;
 
     	    		// 2. create "ingredients" ======================================
     	    		// fill in knot_vector_u
-    	    		// for(int u_idx = 0; u_idx < boost::python::len(myPythondict["faces"][i]["surface"][""]))
+    	    		for(int u_idx = 0;
+    	    				u_idx < boost::python::len(myPythondict["faces"][i]["surface"][0]["knot_vectors"][0]);
+    	    				u_idx ++)
     	    		{
-    	    			//
-    	    			// knot_vector_u.push_back();
+    	    			// read knot
+    	    			double knot = takeDouble(myPythondict["faces"][i]["surface"][0]["knot_vectors"][0][u_idx]);
+    	    			knot_vector_u.push_back( knot );
     	    		}
+
+
+//    	    		for( auto entris : knot_vector_u)
+//    	    		{
+//    	    			std::cout << "my test: " << entris << std::endl;
+//    	    		}
     	    		// fill in knot_vector_v
 
+    	    		for(int v_idx = 0;
+    	    			v_idx < boost::python::len(myPythondict["faces"][i]["surface"][0]["knot_vectors"][1]);
+    	    		    v_idx ++)
+    	    		{
+    	    			// read knot
+    	    			double knot = takeDouble(myPythondict["faces"][i]["surface"][0]["knot_vectors"][1][v_idx]);
+    	    			knot_vector_v.push_back( knot );
+    	    		}
+
+//    	    		for( auto entris : knot_vector_v)
+//    	    		{
+//    	    			std::cout << "my test: " << entris << std::endl;
+//    	    		}
     	    		// get p and q
+    	    		p = takeInt(myPythondict["faces"][i]["surface"][0]["degrees"][0]);
+    	    		q = takeInt(myPythondict["faces"][i]["surface"][0]["degrees"][1]);
 
     	    		// fill in control_points
 
+    	    		for(int cp_idx = 0;
+    	    				cp_idx < boost::python::len(myPythondict["faces"][i]["surface"][0]["control_points"]);
+    	    				cp_idx ++)
+    	    		{
+//    	    			std::cout << cp_idx << std::endl;
+
+    	    			int ID = takeInt( myPythondict["faces"][i]["surface"][0]["control_points"][cp_idx][0] );
+    	    			double x = takeDouble( myPythondict["faces"][i]["surface"][0]["control_points"][cp_idx][1][0] );
+    	    			double y = takeDouble( myPythondict["faces"][i]["surface"][0]["control_points"][cp_idx][1][1] );;
+    	    			double z = takeDouble( myPythondict["faces"][i]["surface"][0]["control_points"][cp_idx][1][2] );;
+    	    			double w = takeDouble( myPythondict["faces"][i]["surface"][0]["control_points"][cp_idx][1][3] );;
+
+    	    			// read knot
+    	    			ControlPoint myControlPoint( x, y, z, w, ID);
+    	    			control_points.push_back( myControlPoint );
+
+    	    		}
+
+//    	    		for( auto entries : control_points)
+//    	    		{
+//    	    			std::cout << "ID: " << entries.getID() << std::endl;
+//    	    			std::cout << "X: " << entries.getX() << std::endl;
+//    	    			std::cout << "Y: " << entries.getY() << std::endl;
+//    	    			std::cout << "Z: " << entries.getZ() << std::endl;
+//    	    			std::cout << "W: " << entries.getWeight() << std::endl;
+//    	    		}
+
+
     	    		// 3. create patch  =============================================
-//    	    		auto patch = new Patch(knot_vector_u, knot_vector_v, p, q, control_points);
-//    	    		patches.push_back(patch)
+    	    		Patch patch (knot_vector_u, knot_vector_v, p, q, control_points);
+    	    		patches.push_back(patch);
     	    	}
 //        KRATOS_TRY;
 
@@ -290,7 +343,7 @@ private:
     // ==============================================================================
     // General working arrays
     // ==============================================================================
-    std::vector<Patch> patches;
+    std::vector< Patch > patches;
     SparseMatrixType m_mapping_matrix;
 
     /// Assignment operator.

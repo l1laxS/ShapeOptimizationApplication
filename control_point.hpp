@@ -6,8 +6,8 @@
  A General Purpose Software for Multi-Physics Finite Element Analysis
  (Released on march 05, 2007).
 
- Copyright (c) 2016: Daniel Baumgaertner
-                     daniel.baumgaertner@tum.de
+ Copyright (c) 2016: Giovanni Filomeno
+                     giovanni.filomeno@tum.de
                      Chair of Structural Analysis
                      Technische Universitaet Muenchen
                      Arcisstrasse 21 80333 Munich, Germany
@@ -44,8 +44,8 @@
 //
 // ==============================================================================
 
-#ifndef CONTROL_POINT_H
-#define CONTROL_POINT_H
+#ifndef CONTROL_POINT_H_
+#define CONTROL_POINT_H_
 
 // ------------------------------------------------------------------------------
 // System includes
@@ -73,6 +73,7 @@
 #include "../../kratos/includes/model_part.h"
 #include "../../kratos/includes/kratos_flags.h"
 #include "shape_optimization_application.h"
+
 // ==============================================================================
 
 namespace Kratos
@@ -80,6 +81,7 @@ namespace Kratos
 class ControlPoint
 {
 public:
+
     // ==========================================================================
     // Type definitions for linear algebra including sparse systems
     // ==========================================================================
@@ -87,75 +89,94 @@ public:
     typedef typename SparseSpaceType::MatrixType SparseMatrixType;
     typedef typename SparseSpaceType::VectorType VectorType;
     typedef std::vector<double> DoubleVector;
-    typedef boost::python::extract<double> takeDouble;
-    typedef boost::python::extract<int> takeInt;
-    typedef boost::python::extract<bool> takeBool;
-    typedef std::vector<int> IntVector;
 
     /// Pointer definition of ControlPoint
     KRATOS_CLASS_POINTER_DEFINITION(ControlPoint);
 
     /// Default constructor.
-    ControlPoint( int id,
-    			  double x,
-    			  double y,
-				  double z,
-				  double w):
-				id(id),
-    			x(x),
-				y(y),
-				z(z),
-				w(w)
+    ControlPoint( DoubleVector COOR, double W, int id)
     {
+    	Coordinates = COOR;
+    	w = W;
+    	ID = id;
+    }
+
+    ControlPoint( double X, double Y, double Z, double W, int id)
+    {
+    	Coordinates.push_back( X );
+    	Coordinates.push_back( Y );
+    	Coordinates.push_back( Z );
+		w = W;
+    	ID = id;
+    }
+
+    double getX()
+    {
+    	return Coordinates[0];
+    }
+
+    double getY()
+    {
+     	return Coordinates[1];
+    }
+
+    double getZ()
+    {
+    	return Coordinates[2];
+    }
+
+    double getWeight()
+    {
+    	return w;
+    }
+
+    int getID()
+    {
+    	return ID;
     }
 
     /// Destructor.
     virtual ~ControlPoint()
     {
     }
+    // ==============================================================================
+
+
+//    evaluat
 
     // ==============================================================================
+
+
     /// Turn back information as a string.
     virtual std::string Info() const
     {
         return "ControlPoint";
     }
 
-    // ==============================================================================
     /// Print information about this object.
     virtual void PrintInfo(std::ostream& rOStream) const
     {
         rOStream << "ControlPoint";
     }
 
-    // ==============================================================================
     /// Print object's data.
     virtual void PrintData(std::ostream& rOStream) const
     {
     }
 
-private:
-    // ==============================================================================
-    // Initialized by class constructor
-    // ==============================================================================
-    int id;
-    double x;
-    double y;
-    double z;
-    double w;
 
+private:
     // ==============================================================================
     // General working arrays
     // ==============================================================================
-    /// Assignment operator.
-//      ControlPoint& operator=(ControlPoint const& rOther);
+    DoubleVector Coordinates;
+    double w;
+    int ID;
 
-    /// Copy constructor.
-//      ControlPoint(ControlPoint const& rOther);
 
 
 }; // Class ControlPoint
 
 }  // namespace Kratos.
 
-#endif // CONTROL_POINT_H
+#endif // CONTROL_POINT_H_
