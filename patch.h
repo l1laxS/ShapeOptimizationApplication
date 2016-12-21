@@ -55,6 +55,7 @@
 #include <algorithm>
 #include <Python.h>
 #include <cmath>
+#include <math.h>
 
 // ------------------------------------------------------------------------------
 // External includes
@@ -135,6 +136,22 @@ public:
 			  p(p), q(q),
 			  control_points(control_points)
     {
+    	m_u = knot_vector_u.size();
+    	m_v = knot_vector_v.size();
+
+    	n_u = m_u - p -1;
+    	n_v = m_v - q -1;
+
+//    	std::cout << m_u << m_v << n_u << n_v;
+
+    	size_t nu = n_u;
+    	size_t nv = n_v;
+
+    	if( control_points.size() != nu*nv )
+    	{
+    		std::cout << "Invalid Patch" << std::endl;
+    	}
+
     }
 
     /// Destructor.
@@ -143,73 +160,72 @@ public:
     }
 
     // ==============================================================================
-    // returns the value of the NURBS function given the parameters
+//    // returns the value of the NURBS function given the parameters
 //    void eval_Nurbsbasis(int i, int j, double u, double v, DoubleMatrix& R)
 //    {
 //    	//
 //    	if(i==0)
 //    	{
-//    		i=find_Knot_Span(knot_vector_u,u,p,N_Ctrl); // da dove sbucano fuori?
-//
-//    		if(j==0)
-//    		{
-//    			j=find_Knot_Span(knot_vector_v,v,q,M_Ctrl); //da dove vengono pt2?
-//    		}
+//    		i=find_Knot_Span(knot_vector_u,u,p,n_v); // da dove sbucano fuori?
+//    	}
+//    	if(j==0)
+//    	{
+//    		j=find_Knot_Span(knot_vector_v,v,q,n_u); //da dove vengono pt2?
+//    	}
 //
 //    	  //matrix<cfloat> N;
 //    	  //matrix<cfloat> M;
-//    	  DoubleVector N;
-//    	  DoubleVector M;
+//    	DoubleVector N;
+//    	DoubleVector M;
 //    	  //eval_Derivative_NonzeroBasis_Fct[N,knot_vector_u,_u,_i,p,2];
 //    	  //eval_Derivative_NonzeroBasis_Fct[M,knot_vector_v,_v,_j,q,2];
-//    	  R.resize[p+1][q+1];
-//    	  eval_Nonzero_Basis_Fct(N,knot_vector_u,u,i,p);
-//    	  eval_Nonzero_Basis_Fct(M,knot_vector_v,v,j,q);
+//    	R.resize[p+1][q+1];
+//    	eval_Nonzero_Basis_Fct(N,knot_vector_u,u,i,p);
+//    	eval_Nonzero_Basis_Fct(M,knot_vector_v,v,j,q);
 //
-//    	  double sum = 0.0;
-//    	  double weight;
+//    	double sum = 0.0;
+//    	double weight;
 //
-//    	  for (int c=0;c <= q; c++)
+//    	for (int c=0;c <= q; c++)
+//    	{
+//    	  for (int b = 0; b <= p; b++)
 //    	  {
-//    	    for (int b = 0; b <= p; b++)
-//    	    {
-//    	      weight = Ctrl_Pt_Net[i-p+b][j-q+c]->get_Weight();
-//    	      R[b][c] = N[b]*M[c]*weight;
-//    	      sum +=R[b][c];
-//    	    }
+//    	    weight = Ctrl_Pt_Net[i-p+b][j-q+c]->get_Weight();
+//    	    R[b][c] = N[b]*M[c]*weight;
+//    	    sum +=R[b][c];
 //    	  }
+//    	}
 //
 //    	  // divide by sum only required in terms of rational basis functions
 //    	  //if [fabs[sum-weight]> cepsilon] //Breitenberger 18.06.2014
-//    	    double inv_sum = 1/sum;
-//    	    // divide through by sum
-//    	    for(int c=0; c<=q; c++)
-//    	    {
-//    	    	for(int b = 0 ; b <= p; b++)
-//    	    	{
-//    	    		R[b][c] = inv_sum*R[b][c];
-//    	    	}
-//    	    }
+//    	double inv_sum = 1/sum;
+//    	   // divide through by sum
+//    	for(int c=0; c<=q; c++)
+//    	{
+//    	 	for(int b = 0 ; b <= p; b++)
+//    	  	{
+//    	   		R[b][c] = inv_sum*R[b][c];
+//    	   	}
+//    	}
 //
 //    	//hint for computing X from given parameter
-//    	double x=0
-//    	double y=0
-//    	double z=0
+//    	double x=0;
+//    	double y=0;
+//    	double z=0;
 //
-//    	for (int c = 0; c <= q; c++ )
-//    	  {
-//    	    for (int b=0; b <= p; b++)
-//    	    {
-//    	    	x = x + R[b][c]* Ctrl_Pt_Net[i-p+b][j-q+c]->x;
-//    	    	y = y + R[b][c] * Ctrl_Pt_Net[i-p+b][j-q+c]->y;
-//    	    	z += R[b][c] * Ctrl_Pt_Net[i-p+b][j-q+c]->z;
-//    	    }
-//    	  }
+//		for(int l = 0; l <= q; l++)
+//		{
+//			for(int a = 0; a <=q; a++ )
+//			{
+//				x = x + R[a][l] * Ctrl_Pt_Net[ i - p + a ][ j - q + l ]->getX();
+//				y = y + R[a][l] * Ctrl_Pt_Net[ i - p + a ][ j - q + l ]->getY();
+//				z = z + R[a][l] * Ctrl_Pt_Net[ i - p + a ][ j - q + l ]->getZ();
+//			}
+//		}
 //
-//    	}
 //    };
 
-    // returns the value of the NURBS derivative given the parameters
+//    // returns the value of the NURBS derivative given the parameters
 //    void eval_Derivative_NonzeroBasis_Fct(DoubleMatrix dNBasisFct,
 //    		DoubleVector knotVec, double par, int span, int pDeg, int kth)
 //    {
@@ -226,7 +242,7 @@ public:
 ////    	  a.resize[2,_pDeg+1];
 ////    	  left.resize[_pDeg+1];
 ////    	  right.resize[_pDeg+1];
-//    	ndu[0,0] = 1.00;
+//    	ndu[0][0] = 1.00;
 //
 //    	for(int i=1; i <= pDeg; i++)
 //    	{
@@ -247,7 +263,7 @@ public:
 //    	  {
 //    		  dnFct[0][i] = ndu[i][pDeg];
 //    	  }
-//    	  for(int j=0;j<=pDeg;j++)
+//    	  for(int j=0;j <= pDeg;j++)
 //    	  {
 //    		  s1 = 0;
 //    		  s2 = 1;
@@ -280,7 +296,7 @@ public:
 //    			  }
 //    			  for(int l=j1;l<=j2;l++)
 //    			  {
-//    				  a[s2][l] = [a[s1][l]-a[s1][l-1]]/ndu[pk+1][jk+l];
+//    				  a[s2][l] = (a[s1][l]-a[s1][l-1])/ndu[pk+1][jk+l];
 //    				  d += a[s2][l]*ndu[jk+l][pk];
 //    			  }
 //    			  if(j<=pk)
@@ -301,7 +317,7 @@ public:
 //    		  {
 //    			  dnFct[k][l] *= jj;
 //    		  }
-//    	  jj *= [pDeg-k];
+//    	  jj *= (pDeg-k);
 //    	  }
 //    	  dNBasisFct = dnFct;
 //    }
@@ -309,9 +325,186 @@ public:
     // returns the coordinates of the point given the parameters
     void S(double& x, double& y, double& z, double u, double v)
     {
+    	x = 0;
+    	y = 0;
+    	z = 0;
 
+    	for(int i = 0; i < n_u; i++)
+    	{
+    		for(int j = 0; j < n_v; j++)
+    		{
+    			int index = getCPIndex( i, j);
+    			double RR = R( u, v, i, j);
+    			x = x + RR * control_points[ index ].getX();
+    			y = y + RR * control_points[ index ].getY();
+    			z = z + RR * control_points[ index ].getZ();
+    		}
+    	}
     }
 
+    int getCPIndex(const int i,const int j)
+    {
+    	return j * n_u + i;
+    }
+
+
+    double R(const double& u, const double& v,const int& i, const int& j)
+    {
+//    	for(int k=5; k>= 0 ; k--)
+//    	{
+//    	for(int i=0; i<k; i++)
+//    	{
+//    		std::cout << "i = " << i << std::endl;
+//    		std::cout << N( knot_vector_v, 0, i, 5-k) << std::endl;
+//    		std::cout << N( knot_vector_v, 2.5, i, 5-k) << std::endl;
+//    		std::cout << N( knot_vector_v, 5.0, i, 5-k) << std::endl << std::endl;
+//    	}
+//    	}
+
+        // max index of knot vector (from 0 to m-1)
+
+        double lo = 0.0;
+        double n_tmp = 0.0;
+
+//        std::cout << "I'm in R" << std::endl;
+
+        DoubleVector Nii;
+        DoubleVector Njj;
+
+        for(int jj=0; jj < n_v; jj++)
+        {
+         	 auto Nj = N(knot_vector_v, v, jj, q);
+         	 Njj.push_back( Nj );
+        }
+
+//        if( v == knot_vector_v.back())
+//        {
+//        	Njj[ n_v - 1] = 1.0;
+//        }
+
+        for(int ii=0; ii< n_u; ii++)
+        {
+        	double N_ii = N(knot_vector_u, u, ii, p);
+        	Nii.push_back( N_ii );
+        }
+
+//        if( u == knot_vector_u.back())
+//        {
+//           	Nii[ n_u - 1] = 1.0;
+//        }
+
+
+
+        for(int ii=0; ii < n_u; ii++)
+        {
+        	for(int jj=0; jj < n_v; jj++)
+        	{
+        		n_tmp = Nii[ii] * Njj[jj];
+        		int index  = getCPIndex( ii, jj);
+        		lo = lo + n_tmp * control_points[ index ].getWeight();
+//        		lo = lo + n_tmp;
+        	}
+        }
+
+//        std::cout << "I'm in R" << std::endl;
+
+        if(fabs(lo)<TOL) {
+            return 0;
+        }
+
+        int index = getCPIndex( i, j);
+        double up = N(knot_vector_u, u, i, p) * N(knot_vector_v, v, j, q) * control_points[ index ].getWeight();
+//        double up = N(knot_vector_u, u, i, p) * N(knot_vector_v, v, j, q);
+//        std:: cout << "I am in R " << up/lo << std::endl;
+        return up/lo;
+
+
+
+    }
+    // Returns the R without weight in u/v direction
+
+
+    // U = knot vector
+    // t = parameter in the parameter space
+    // p = degree
+    // i = number of shape function
+
+	double N(DoubleVector& U,const double& t,const int& i,const int& p_degree)
+	{
+		// max index of knot vector (from 0 to m)
+		int m = U.size();
+
+//		int lastZeroDegree = m - 1;
+
+		if( p_degree == 0 && t == U.back() && i == m-p-2)
+		{
+			return 1.0;
+		}
+
+//		std::cout << std::endl << "BEGIN" << std::endl;
+//
+//		std::cout << "N" << i << "," << p_degree << std::endl;
+
+		// check if i is in interval 0 <= i <= n. (with n = m-p-1)
+		// and if t is in the interval of the knot vector
+		if ((i < 0) || (i >= (m - p - 1)) || t < U.front() || t > U.back()) {
+
+			return 0.0;
+		}
+
+		// treat case of p_degree == 0
+		if (p_degree == 0) {
+			// check if t is in interval from t_i <= t < t_(i+1)
+			if ((U[i] <= t) && (t < U[i + 1])) {
+
+				return 1.0;
+			} else {
+
+				return 0.0;
+			}
+
+		} else {
+			double e1, e2, up, lo;
+
+			// compute division term 1
+			up = t - U[i];
+			lo = U[i + p_degree] - U[i];
+
+			if (fabs(lo) < TOL) {
+				e1 = 0.0;
+			} else {
+				e1 = up / lo;
+			}
+
+//			std::cout<<"Up=" <<up << " LO=" << lo <<std::endl;
+			// compute division term 2
+			up = U[i + p_degree + 1] - t;
+			lo = U[i + p_degree + 1] - U[i + 1];
+
+			if (fabs(lo) < TOL) {
+				e2 = 0.0;
+			} else {
+				e2 = up / lo;
+			}
+//			std::cout<<"Up=" <<up << " LO=" << lo <<std::endl;
+//			std::cout <<"N" << i << "," << p_degree << "-->e1 " << e1 << " e2 " << e2 << std::endl;
+			// compute basis function recursively
+			double sn = 0.0;
+
+			if (fabs(e1) > TOL) {
+//				std::cout << "calling" << std::endl;
+				sn += e1 * N(U, t, i, p_degree - 1);
+			}
+
+			if (fabs(e2) > TOL) {
+//				std::cout << "calling" << std::endl;
+				sn += e2 * N(U, t, i + 1, p_degree - 1);
+			}
+
+
+			return sn;
+		}
+	}
     // ==============================================================================
     /// Turn back information as a string.
     virtual std::string Info() const
@@ -332,7 +525,7 @@ public:
     {
     }
 
-    int find_Knot_Span (DoubleVector knotVec, double par,int pDeg, int nCtrl) const
+    int find_Knot_Span(DoubleVector knotVec, double par,int pDeg, int nCtrl) const
     {
 
         if(par<=knotVec[0])
@@ -345,8 +538,8 @@ public:
         	par = knotVec[knotVec.size()-1]-1.0e-14;
         }
 
-      float check;
-      check = fabs(par - knotVec[nCtrl+1] );
+//      float check;
+//      check = fabs(par - knotVec[nCtrl+1] );
 
       int low = pDeg;
       int high = nCtrl+1;
@@ -376,6 +569,12 @@ private:
     int p;
     int q;
     controlPointVcr control_points;
+    // Number of control points in u & v
+    int n_u;
+    int n_v;
+    int m_u;
+    int m_v;
+    double TOL = 10e-4;
 
     // ==============================================================================
     // General working arrays

@@ -120,7 +120,7 @@ public:
     {
     }
 
-    void initialize_patches()
+    void compute_mapping_matrix()
     {
     	// loop over faces
     	for(int i=0; i < boost::python::len(myPythondict["faces"]); i++)
@@ -130,9 +130,24 @@ public:
     	}
     }
 
+    boost::python::list compute_point(unsigned int patch_id, double u, double v)
+    {
+    	boost::python::list point;
+    	double x = 0, y = 0, z = 0;
+    	patches[ patch_id ].S( x, y, z, u, v);
+
+    	point.append(x);
+    	point.append(y);
+    	point.append(z);
+
+    	KRATOS_WATCH("!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+    	return point;
+    }
+
 
     // ==============================================================================
-    void compute_mapping_matrix()
+    void initialize_patches()
     {
     	// loop over faces
     	    	for(int i=0; i < boost::python::len(myPythondict["faces"]); i++)
@@ -313,6 +328,40 @@ public:
 
 //    evaluat
 
+//    void Surface( int& i, double& u, double& v )
+    void Surface()
+    {
+    	int i=1;
+    	double u=5.0;
+    	double v=5.0;
+    	double x = 0, y = 0, z = 0;
+    	patches[ i-1 ].S( x, y, z, u, v);
+    	std::cout<<"My results: "  << x << " " << y << " " << z << std::endl;
+
+//    	int i=1;
+    	u=2.5;
+    	v=2.5;
+//    	double x = 0, y = 0, z = 0;
+    	patches[ i-1 ].S( x, y, z, u, v);
+    	std::cout<<"My results: "  << x << " " << y << " " << z << std::endl;
+
+
+//    	int i=1;
+    	u=3.75;
+    	v=3.75;
+//    	double x = 0, y = 0, z = 0;
+    	patches[ i-1 ].S( x, y, z, u, v);
+    	std::cout<<"My results: "  << x << " " << y << " " << z << std::endl;
+
+
+//    	int i=1;
+    	u=5.0;
+    	v=0;
+//    	double x = 0, y = 0, z = 0;
+    	patches[ i-1 ].S( x, y, z, u, v);
+    	std::cout<<"My results: "  << x << " " << y << " " << z << std::endl;
+
+    }
     // ==============================================================================
 
     /// Turn back information as a string.
