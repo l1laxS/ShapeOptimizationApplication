@@ -17,7 +17,7 @@ from pprint import pprint
 
 #########################################################################
 
-###############################################################################
+##############################################################################
 
 # Read the FE model
 fe_model_part = ModelPart("name_of_empty_mdpa")
@@ -25,23 +25,28 @@ model_part_io = ModelPartIO("FEM_mesh")
 model_part_io.ReadModelPart(fe_model_part)
 
 # Read CAD model
-# path = "simple_example_geometry.json"
+##############################################################################
+#path = "simple_example_geometry.json"
+#patch_id = 0
+#u = 2.5
+#v = 2.5
+
+##############################################################################
 path = "hock_geometry.json"
+patch_id = 2
+u = 100
+v = 400
+
 face = None
 with open(path) as data_file:
     data = json.load(data_file)
-    pprint(data)
+    #pprint(data)
 
 mapper = IBRAMapper(fe_model_part,data)
 
 mapper.initialize_patches()
 
 #mapper.Surface()
-
-
-patch_id = 1
-u = 2.5
-v = 2.5
 
 point = mapper.compute_point(patch_id, u, v)
 print(point)
