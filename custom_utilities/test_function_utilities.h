@@ -43,8 +43,8 @@
 //
 // ==============================================================================
 
-#ifndef FILTER_FUNCTION_H
-#define FILTER_FUNCTION_H
+#ifndef FUNCTION_TESTER_UTILITIES
+#define FUNCTION_TESTER_UTILITIES
 
 // ------------------------------------------------------------------------------
 // System includes
@@ -52,7 +52,6 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include <iomanip> // for std::setprecision
 
 // ------------------------------------------------------------------------------
 // External includes
@@ -71,6 +70,12 @@
 #include "../../kratos/includes/element.h"
 #include "../../kratos/includes/model_part.h"
 #include "../../kratos/includes/kratos_flags.h"
+#include "../../kratos/spatial_containers/spatial_containers.h"
+#include "../../kratos/utilities/timer.h"
+#include "../../kratos/processes/node_erase_process.h"
+#include "../../kratos/utilities/binbased_fast_point_locator.h"
+#include "../../kratos/utilities/normal_calculation_utils.h"
+#include "../../kratos/spaces/ublas_space.h"
 #include "shape_optimization_application.h"
 
 // ==============================================================================
@@ -102,7 +107,7 @@ namespace Kratos
 
 */
 
-class FilterFunction
+class FunctionTester
 {
   public:
     ///@name Type Definitions
@@ -112,42 +117,36 @@ class FilterFunction
     // Type definitions for better reading later
     // ==========================================================================
     typedef array_1d<double, 3> array_3d;
+    typedef Node<3> NodeType;
+    typedef std::vector<NodeType::Pointer> NodeVector;
+    typedef std::vector<NodeType::Pointer>::iterator PointIterator;
+    typedef std::vector<double> DistanceVector;
+    typedef std::vector<double>::iterator DistanceIterator;
+    typedef ModelPart::ConditionsContainerType ConditionsArrayType;
 
-    /// Pointer definition of FilterFunction
-    KRATOS_CLASS_POINTER_DEFINITION(FilterFunction);
+    // ==========================================================================
+    // Type definitions for linear algebra including sparse systems
+    // ==========================================================================
+    typedef UblasSpace<double, CompressedMatrix, Vector> SparseSpaceType;
+    typedef typename SparseSpaceType::MatrixType SparseMatrixType;
+    typedef typename SparseSpaceType::VectorType VectorType;
+    typedef UblasSpace<double, Matrix, Vector> LocalSpaceType;
+
+    /// Pointer definition of FunctionTester
+    KRATOS_CLASS_POINTER_DEFINITION(FunctionTester);
 
     ///@}
     ///@name Life Cycle
     ///@{
 
     /// Default constructor.
-    FilterFunction(std::string filter_function_type, double filter_size)
-        : m_filter_size(filter_size)
+    FunctionTester(ModelPart &model_part)
+        : mr_model_part(model_part)
     {
-        // Set precision for output
-        std::cout.precision(12);
-
-        // Create strings to compare to
-        std::string gaussian("gaussian");
-        std::string linear("linear");
-
-        // Set type of weighting function
-
-        // Type 1: Gaussian function
-        if (filter_function_type.compare(gaussian) == 0)
-            m_filter_function_type = 1;
-
-        // Type 2: Linear function
-        else if (filter_function_type.compare(linear) == 0)
-            m_filter_function_type = 2;
-
-        // Throw error message in case of wrong specification
-        else
-            KRATOS_THROW_ERROR(std::invalid_argument, "Specified filter function type not recognized. Options are: linear , gaussian. Specified: ",filter_function_type);
     }
 
     /// Destructor.
-    virtual ~FilterFunction()
+    virtual ~FunctionTester()
     {
     }
 
@@ -160,43 +159,62 @@ class FilterFunction
     ///@{
 
     // ==============================================================================
-
-    double compute_weight(array_3d i_coord, array_3d j_coord)
+    void test_function()
     {
         KRATOS_TRY;
 
-        // Compute distance vector
-        array_3d dist_vector = i_coord - j_coord;
+        // // Create list of possible nearest neighbors in a KD-Tree
+        // NodeVector list_of_nodes;
+        // for (ModelPart::NodesContainerType::iterator node_it = mr_model_part.NodesBegin(); node_it != mr_model_part.NodesEnd(); ++node_it)
+        // {
+        //     NodeType::Pointer pnode = *(node_it.base());
+        //     list_of_nodes.push_back(pnode);
+        // }
 
-        // Depending on which weighting function is chosen, compute weight
-        double weight_ij = 0.0;
-        switch (m_filter_function_type)
-        {
-        // Gaussian filter
-        case 1:
-        {
-            // Compute squared distance
-            double squared_scalar_distance = dist_vector[0] * dist_vector[0] + dist_vector[1] * dist_vector[1] + dist_vector[2] * dist_vector[2];
-            // Compute weight
-            // Note that we do not compute the square root of the distances to save this expensive computation (it is not needed here)
-            weight_ij = exp(-squared_scalar_distance / (2 * m_filter_size * m_filter_size / 9.0));
-            break;
-        }
-        // Linear filter
-        case 2:
-        {
-            // Compute distance
-            double distance = sqrt(dist_vector[0] * dist_vector[0] + dist_vector[1] * dist_vector[1] + dist_vector[2] * dist_vector[2]);
-            // Compute weight
-            weight_ij = std::max(0.0, (m_filter_size - distance) / m_filter_size);
-            break;
-        }
-        }
+        // // Construct KD-Tree
+        // typedef Bucket< 3, NodeType, NodeVector, NodeType::Pointer, PointIterator, DistanceIterator > BucketType;
+        // typedef Tree< KDTreePartition<BucketType> > tree;
+        // int bucket_size = 20;
+        // tree nodes_tree(list_of_nodes.begin(), list_of_nodes.end(), bucket_size);
 
-        return weight_ij;
+        // // Loop over all integration points of model-part and find corresponding closest neighbors
+        // for (ModelPart::ElementsContainerType::iterator elem_i = mr_model_part.ElementsBegin(); elem_i != mr_model_part.ElementsEnd(); ++elem_i)
+        // {
+        // 	// Get geometry information of current element (integration method, integration points, shape function values of integration points)
+        // 	const Element::GeometryType::IntegrationMethod integration_method = elem_i->GetIntegrationMethod();
+        // 	const Element::GeometryType::IntegrationPointsArrayType& integration_points = elem_i->GetGeometry().IntegrationPoints(integration_method);
+        // 	const Matrix& N_container = elem_i->GetGeometry().ShapeFunctionsValues(integration_method);
+
+        // 	std::cout << "------------------------------" << std::endl;
+        // 	std::cout << "elem_i->Id() = " << elem_i->Id() << std::endl;
+
+        // 	for ( unsigned int PointNumber = 0; PointNumber < integration_points.size(); PointNumber++ )
+        // 	{
+        // 		// Compute global coordinates of current integration point and get corresponding weight
+        // 		NodeType::CoordinatesArrayType ip_coordinates = elem_i->GetGeometry().GlobalCoordinates(ip_coordinates, integration_points[PointNumber].Coordinates());
+        // 		NodeType::Pointer point_of_interest = Node < 3 > ::Pointer(new Node<3>(PointNumber, ip_coordinates ));
+        // 		double i_weight = integration_points[PointNumber].Weight();
+
+        // 		// Search nearest neighbor of current integration point
+        // 		NodeType resulting_nearest_point;
+        // 		NodeType::Pointer nearest_point = nodes_tree.SearchNearestPoint( *point_of_interest );
+
+        // 		// Get FEM-shape-function-value for current integration point
+        // 		Vector N_FEM_GPi = row( N_container, PointNumber);
+
+        // 		// Some output
+        // 		KRATOS_WATCH(integration_points[PointNumber]);
+        // 		KRATOS_WATCH(*point_of_interest);
+        // 		KRATOS_WATCH(*nearest_point);
+        // 		KRATOS_WATCH(N_FEM_GPi);
+        // 	}
+
+        // }
 
         KRATOS_CATCH("");
     }
+
+    // --------------------------------------------------------------------------
 
     // ==============================================================================
 
@@ -215,13 +233,13 @@ class FilterFunction
     /// Turn back information as a string.
     virtual std::string Info() const
     {
-        return "FilterFunction";
+        return "FunctionTester";
     }
 
     /// Print information about this object.
     virtual void PrintInfo(std::ostream &rOStream) const
     {
-        rOStream << "FilterFunction";
+        rOStream << "FunctionTester";
     }
 
     /// Print object's data.
@@ -273,8 +291,14 @@ class FilterFunction
     ///@name Member Variables
     ///@{
 
-    double m_filter_size;
-    unsigned int m_filter_function_type;
+    // ==============================================================================
+    // Initialized by class constructor
+    // ==============================================================================
+    ModelPart &mr_model_part;
+
+    // ==============================================================================
+    // General working arrays
+    // ==============================================================================
 
     ///@}
     ///@name Private Operators
@@ -297,14 +321,14 @@ class FilterFunction
     ///@{
 
     /// Assignment operator.
-    //      FilterFunction& operator=(FilterFunction const& rOther);
+    //      FunctionTester& operator=(FunctionTester const& rOther);
 
     /// Copy constructor.
-    //      FilterFunction(FilterFunction const& rOther);
+    //      FunctionTester(FunctionTester const& rOther);
 
     ///@}
 
-}; // Class FilterFunction
+}; // Class FunctionTester
 
 ///@}
 
@@ -319,4 +343,4 @@ class FilterFunction
 
 } // namespace Kratos.
 
-#endif // FILTER_FUNCTION_H
+#endif // FUNCTION_TESTER_UTILITIES
