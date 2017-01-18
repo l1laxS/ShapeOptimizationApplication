@@ -908,6 +908,20 @@ public:
 		}
 	}		
 	//-----------------------------------------------------------------------------------------
+	// #######################################################################################
+	///
+	///  \details    Returns a DoubleVector (a.k.a. std::vector<double> given by c*M*b
+	///
+	/// ======================================================================================
+	///  \param[in]  QminP   	 	Vector distance between Q and P
+	///  \param[in]  H     			Hessian reference matrix, defined as matrix<double>
+	///  \param[in]  Gradient  		Gradient reference vector, defined as std::vector<double> (a.k.a. DoubleVector)
+    ///  \param[in]  u,v  			u and v value of the parameter space
+	///
+	/// ======================================================================================
+	///  \author     Giovanni Filomeno (1/2017)
+	//
+	//########################################################################################
 	void evaluate_Hessian_and_Gradient(DoubleVector QminP, matrix<double>& H, DoubleVector& Gradient , double u, double v)
 	{
 		matrix<double> dR;

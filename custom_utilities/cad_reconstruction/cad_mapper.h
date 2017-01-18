@@ -395,7 +395,7 @@ class CADMapper
 				double det_H = myHessian(0,0)*myHessian(1,1) - myHessian(0,1)*myHessian(1,0);
 				MathUtils<double>::InvertMatrix( myHessian, InvH, det_H );
 
-//				prod( InvH, myGradient, deltau);
+				matrixVectorProductWithCoefficient( InvH, myGradient, deltau, -1);
 
 				u_k -= deltau[0];
 				v_k -= deltau[1];
@@ -547,6 +547,37 @@ class CADMapper
 		temp_file.close();
     }
     // --------------------------------------------------------------------------
+
+	// #######################################################################################
+	///
+	///  \details    Returns a DoubleVector (a.k.a. std::vector<double> given by c*M*b
+	///
+	/// ======================================================================================
+	///  \param[in]  M    	 	Matrix defined as matrix<double>
+	///  \param[in]  b     		Vector defined as std::vector<double> or DoubleVector
+	///  \param[in]  c  		Coefficient ( eventually imposed to 1
+    ///  \param[in]  result  	Reference to DoubleVector --> will contain the solution
+	///
+	/// ======================================================================================
+	///  \author     Giovanni Filomeno (1/2017)
+	//
+	//########################################################################################
+    void matrixVectorProductWithCoefficient(matrix<double> M, DoubleVector b, DoubleVector& result,double coeff)
+    {
+    	result.clear();
+    	double sum = 0.0;
+    	for(size_t j = 0; j < M.size1( ); j++)
+    	{
+			for(size_t i = 0; i < M.size2( ); i++)
+			{
+				sum = sum + M(j,i) * b[i];
+			}
+			sum = sum * coeff;
+			result.push_back( sum );
+			sum = 0;
+    	}
+    }
+
     void map_to_cad_space()
     {
 		// Initialize vectors needed later
