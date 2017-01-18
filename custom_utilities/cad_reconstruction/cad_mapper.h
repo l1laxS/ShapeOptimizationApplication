@@ -53,6 +53,8 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <cmath>
+//#include <MathUtils.h>
 
 // ------------------------------------------------------------------------------
 // External includes
@@ -222,7 +224,7 @@ class CADMapper
 	// --------------------------------------------------------------------------
 	void initialize_fe_model_for_mapping()
 	{
-		// Assign each FE node a uniqe Id in the mapping matrix (according to iterator over nodes)
+		// Assign each FE node a unique Id in the mapping matrix (according to iterator over nodes)
 		m_n_fem_points = 0;
 		for (ModelPart::NodesContainerType::iterator node_i = mr_fe_model_part.NodesBegin(); node_i != mr_fe_model_part.NodesEnd(); ++node_i)
 			node_i->SetValue(MAPPING_MATRIX_ID,m_n_fem_points++);
@@ -352,6 +354,98 @@ class CADMapper
 
 				// Perform Newton-Raphson detailed search
 
+//				Matrix H;
+//				Matrix InvH;
+//
+//				for(int patch_iterator = 0; patch_iterator < boost::python::len(mr_cad_model["faces"]); patch_iterator++)
+//				{
+				double u_k = u_of_nearest_point;
+				double v_k = v_of_nearest_point;
+
+				DoubleVector deltau;
+				deltau.push_back( 1 );
+				deltau.push_back( 1 );
+			while (deltau[0] > 10e-9 || deltau[1] > 10e-9)
+        	{
+				matrix<double> myHessian( 2, 2, 0.0);
+				DoubleVector myGradient;
+//				myGradient.push_back( 0.0 );
+//				myGradient.push_back( 0.0 );
+
+				DoubleVector P;
+				DoubleVector Q_k;
+
+				P.push_back( ip_coordinates[0] );
+				P.push_back( ip_coordinates[1] );
+				P.push_back( ip_coordinates[2] );
+
+				Q_k.push_back( nearest_point->X() );
+				Q_k.push_back( nearest_point->Y() );
+				Q_k.push_back( nearest_point->Z() );
+
+				DoubleVector Q_minus_P;
+				Q_minus_P.push_back( P[0] - Q_k[0] );
+				Q_minus_P.push_back( P[1] - Q_k[1] );
+				Q_minus_P.push_back( P[2] - Q_k[2] );
+
+
+				m_patches[patch_id_of_nearest_point].evaluate_Hessian_and_Gradient(Q_minus_P, myHessian, myGradient , u_k, v_k);
+
+				matrix<double> InvH;
+				double det_H = myHessian(0,0)*myHessian(1,1) - myHessian(0,1)*myHessian(1,0);
+				MathUtils<double>::InvertMatrix( myHessian, InvH, det_H );
+
+//				prod( InvH, myGradient, deltau);
+
+				u_k -= deltau[0];
+				v_k -= deltau[1];
+
+        	}
+
+//				for (int c = 0; c <= m_patches[patch_id_of_nearest_point].get_m_q( ); c++)
+//				{
+//					for (int b = 0; b <= m_patches[patch_id_of_nearest_point].get_m_p( ); b++)
+//					{
+//						int span_u = m_patches[patch_id_of_nearest_point].find_Knot_Span(m_knot_vector_u,_u,m_p,m_n_u);
+//						// the control point vector is filled up by first going over u, then over v
+//						int ui = span_u-m_p+b;
+//						int vi = span_v-m_q+c;
+//						int control_point_index =vi*m_n_u + ui;
+//
+//						matrix<double> R;
+//						eval_Nurbsbasis(span_u, span_v, u, v, R);
+//						rSurfacePoint[0] += R(b,c) * m_control_points[control_point_index].getX();
+//						rSurfacePoint[1] += R(b,c) * m_control_points[control_point_index].getY();
+//						rSurfacePoint[2] += R(b,c) * m_control_points[control_point_index].getZ();
+//					}
+//				}
+//				ControlPointVector myControlPoint = m_patches[patch_id_of_nearest_point].get_control_points();
+//
+//				for(auto i = 0; i < myControlPoint.size() ; i++)
+//				{
+//
+//				}
+//				std::cout << "My Size: " << ip_coordinates.size( ) << std::endl;
+
+
+//				matrix<double> myHessian (2, 0.0);
+//				matrix<double> dR ();
+//					m_patches[patch_id].eval_nonzero_basis_function_with_derivatives(
+
+
+
+
+//				}
+
+
+
+//				while ( x_kplus1 - x_k  > 10e-2)
+//				{
+//
+//					double det_H = H.getDeterminant();
+//
+//					x_kplus1 = x_k -InvH * gradF;
+//				}
 
 
 				// To be developed by Massimo and Giovanni...
@@ -362,7 +456,7 @@ class CADMapper
 				// Matrix H; // Hessian obtained from patch.h
 				// Matrix InvH;
 				// double det_H;
-    			// MathUtils<double>::InvertMatrix( H, InvH, det_H );
+//    			 MathUtils<double>::InvertMatrix( H, InvH, det_H );
 
 				// // Multiplication
 				// Vector some_vector;
@@ -452,7 +546,6 @@ class CADMapper
 		}
 		temp_file.close();
     }
-
     // --------------------------------------------------------------------------
     void map_to_cad_space()
     {

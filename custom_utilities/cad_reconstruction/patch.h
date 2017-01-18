@@ -55,6 +55,7 @@
 #include <algorithm>
 #include <cmath>
 #include <math.h>
+#include <numeric>
 
 // ------------------------------------------------------------------------------
 // Project includes
@@ -552,72 +553,72 @@ public:
 	// //
 	// //########################################################################################
 	
-	// void deriv_Nurbsbasisfunc(int span_u, int span_v, double _u, double _v, matrix<double>& _dR, matrix<double>& _ddR)
-	// {
-	// 	if(span_u==0) span_u=find_Knot_Span(m_knot_vector_u,_u,m_p,m_n_u);
-	// 	if(span_v==0) span_v=find_Knot_Span(m_knot_vector_v,_v,m_q,m_n_v);
+	 void deriv_Nurbsbasisfunc(int span_u, int span_v, double _u, double _v, matrix<double>& _dR, matrix<double>& _ddR)
+	 {
+	 	if(span_u==0) span_u=find_Knot_Span(m_knot_vector_u,_u,m_p,m_n_u);
+	 	if(span_v==0) span_v=find_Knot_Span(m_knot_vector_v,_v,m_q,m_n_v);
 	
-	// 	int ne = (m_p+1)*(m_q+1); // Control Points per element
-	// 	matrix<double> N;              // Basisfunc at _u
-	// 	matrix<double> M;              // Basisfunc at _v
-	// 	eval_nonzero_basis_function_with_derivatives(N, m_knot_vector_u, _u, span_u, m_p, 2);
-	// 	eval_nonzero_basis_function_with_derivatives(M, m_knot_vector_v, _v, span_v, m_q, 2);
+	 	int ne = (m_p+1)*(m_q+1); // Control Points per element
+	 	matrix<double> N;              // Basisfunc at _u
+	 	matrix<double> M;              // Basisfunc at _v
+	 	eval_nonzero_basis_function_with_derivatives(N, m_knot_vector_u, _u, span_u, m_p, 2);
+	 	eval_nonzero_basis_function_with_derivatives(M, m_knot_vector_v, _v, span_v, m_q, 2);
 		
-	// 	vector<double> r(ne);
-	// 	r.clear();
-	// 	_dR.resize(ne,2);
-	// 	_ddR.resize(ne,3);
-	// 	double sum = 0.0;
-	// 	Vector dsum = ZeroVector(2);
-	// 	Vector ddsum = ZeroVector(3);
-	// 	int k=0;
-	// 	double weight;
+	 	vector<double> r(ne);
+	 	r.clear();
+	 	_dR.resize(ne,2);
+	 	_ddR.resize(ne,3);
+	 	double sum = 0.0;
+	 	Vector dsum = ZeroVector(2);
+	 	Vector ddsum = ZeroVector(3);
+	 	int k=0;
+	 	double weight;
 		
-	// 	for(int c=0;c<=m_q;c++)
-	// 	{
-	// 		for(int b=0;b<=m_p;b++)
-	// 		{
-	// 			// the control point vector is filled up by first going over u, then over v
-	// 			int ui = span_u-m_p+b;
-	// 			int vi = span_v-m_q+c;
-	// 			int control_point_index =vi*m_n_u + ui;
+	 	for(int c=0;c<=m_q;c++)
+	 	{
+	 		for(int b=0;b<=m_p;b++)
+	 		{
+	 			// the control point vector is filled up by first going over u, then over v
+	 			int ui = span_u-m_p+b;
+	 			int vi = span_v-m_q+c;
+	 			int control_point_index =vi*m_n_u + ui;
 
-	// 			// Evaluate basis function
-	// 			weight = m_control_points[control_point_index].getWeight();
+	 			// Evaluate basis function
+	 			weight = m_control_points[control_point_index].getWeight();
 
-	// 			r[k] = N(0,b)*M(0,c)*weight;
-	// 			sum +=r[k];     
-	// 			//First derivatives
-	// 			_dR(k,0) = N(1,b)*M(0,c)*weight;
-	// 			dsum[0] +=_dR(k,0);
-	// 			_dR(k,1) = N(0,b)*M(1,c)*weight;
-	// 			dsum(1) +=_dR(k,1);  
-	// 			//Second derivatives  1-du^2, 2-dv^2, 3-dudv
-	// 			_ddR(k,0) = N(2,b)*M(0,c)*weight;
-	// 			ddsum(0)  = ddsum(0) + _ddR(k,0);
-	// 			_ddR(k,1) = N(0,b)*M(2,c)*weight;
-	// 			ddsum(1)  = ddsum(1) + _ddR(k,1);
-	// 			_ddR(k,2) = N(1,b)*M(1,c)*weight;
-	// 			ddsum(2)  = ddsum(2) + _ddR(k,2);
-	// 			k++;
-	// 		}
-	// 	}
-	// 	double sum_2 = pow(sum,2);
-	// 	double sum_3 = pow(sum,3);
-	// 	// divide through by sum
-	// 	for(int k=0;k<ne;k++)
-	// 	{
+	 			r[k] = N(0,b)*M(0,c)*weight;
+	 			sum +=r[k];
+	 			//First derivatives
+	 			_dR(k,0) = N(1,b)*M(0,c)*weight;
+	 			dsum[0] +=_dR(k,0);
+	 			_dR(k,1) = N(0,b)*M(1,c)*weight;
+	 			dsum(1) +=_dR(k,1);
+	 			//Second derivatives  1-du^2, 2-dv^2, 3-dudv
+	 			_ddR(k,0) = N(2,b)*M(0,c)*weight;
+	 			ddsum(0)  = ddsum(0) + _ddR(k,0);
+	 			_ddR(k,1) = N(0,b)*M(2,c)*weight;
+	 			ddsum(1)  = ddsum(1) + _ddR(k,1);
+	 			_ddR(k,2) = N(1,b)*M(1,c)*weight;
+	 			ddsum(2)  = ddsum(2) + _ddR(k,2);
+	 			k++;
+	 		}
+	 	}
+	 	double sum_2 = pow(sum,2);
+	 	double sum_3 = pow(sum,3);
+	 	// divide through by sum
+	 	for(int k=0;k<ne;k++)
+	 	{
 		
-	// 		_ddR(k,0) = _ddR(k,0)/sum - 2.0*_dR(k,0)*dsum[0]/sum_2
-	// 				-r[k]*ddsum[0]/sum_2 + 2.0*r[k]*dsum[0]*dsum[0]/sum_3;
-	// 		_ddR(k,1) = _ddR(k,1)/sum - 2.0*_dR(k,1)*dsum[1]/sum_2
-	// 				-r[k]*ddsum[1]/sum_2 + 2.0*r[k]*dsum[1]*dsum[1]/sum_3;
-	// 		_ddR(k,2) = _ddR(k,2)/sum - _dR(k,0)*dsum[1]/sum_2 - _dR(k,1)*dsum[0]/sum_2
-	// 				-r[k]*ddsum[2]/sum_2 + 2.0*r[k]*dsum[0]*dsum[1]/sum_3;
-	// 		_dR(k,0) = _dR(k,0)/sum - r[k]*dsum[0]/sum_2;
-	// 		_dR(k,1) = _dR(k,1)/sum - r[k]*dsum[1]/sum_2;
-	// 	}
-	// }	
+	 		_ddR(k,0) = _ddR(k,0)/sum - 2.0*_dR(k,0)*dsum[0]/sum_2
+	 				-r[k]*ddsum[0]/sum_2 + 2.0*r[k]*dsum[0]*dsum[0]/sum_3;
+	 		_ddR(k,1) = _ddR(k,1)/sum - 2.0*_dR(k,1)*dsum[1]/sum_2
+	 				-r[k]*ddsum[1]/sum_2 + 2.0*r[k]*dsum[1]*dsum[1]/sum_3;
+	 		_ddR(k,2) = _ddR(k,2)/sum - _dR(k,0)*dsum[1]/sum_2 - _dR(k,1)*dsum[0]/sum_2
+	 				-r[k]*ddsum[2]/sum_2 + 2.0*r[k]*dsum[0]*dsum[1]/sum_3;
+	 		_dR(k,0) = _dR(k,0)/sum - r[k]*dsum[0]/sum_2;
+	 		_dR(k,1) = _dR(k,1)/sum - r[k]*dsum[1]/sum_2;
+	 	}
+	 }
 
     //  #####################################################################################
     // #######################################################################################
@@ -906,7 +907,72 @@ public:
 			}
 		}
 	}		
+	//-----------------------------------------------------------------------------------------
+	void evaluate_Hessian_and_Gradient(DoubleVector QminP, matrix<double>& H, DoubleVector& Gradient , double u, double v)
+	{
+		matrix<double> dR;
+		matrix<double> ddR;
+		deriv_Nurbsbasisfunc(0,0, u, v, dR,ddR);
+		DoubleVector dQdu(3,0.0);
+		DoubleVector dQdv(3,0.0);
+		DoubleVector dQdudu(3,0.0);
+		DoubleVector dQdvdv(3,0.0);
+		DoubleVector dQdudv(3,0.0);
+		matrix<int> local_cp_ids;
 
+		get_local_control_point_ids(0, 0, u, v, local_cp_ids);
+		int k=0;
+		for( int c=0;c<=m_q;c++)
+		{
+			for (int b=0;b<=m_p;b++)
+			{
+				dQdu[0] += dR(k,0) * m_control_points[local_cp_ids(b,c)].getX();
+				dQdu[1] += dR(k,0) * m_control_points[local_cp_ids(b,c)].getY();
+				dQdu[2] += dR(k,0) * m_control_points[local_cp_ids(b,c)].getZ();
+
+				dQdv[0] += dR(k,1) * m_control_points[local_cp_ids(b,c)].getX();
+				dQdv[1] += dR(k,1) * m_control_points[local_cp_ids(b,c)].getY();
+				dQdv[2] += dR(k,1) * m_control_points[local_cp_ids(b,c)].getZ();
+
+				dQdudu[0] += ddR(k,0) * m_control_points[local_cp_ids(b,c)].getX();
+				dQdudu[1] += ddR(k,0) * m_control_points[local_cp_ids(b,c)].getY();
+				dQdudu[2] += ddR(k,0) * m_control_points[local_cp_ids(b,c)].getZ();
+
+				dQdvdv[0] += ddR(k,1) * m_control_points[local_cp_ids(b,c)].getX();
+				dQdvdv[1] += ddR(k,1) * m_control_points[local_cp_ids(b,c)].getY();
+				dQdvdv[2] += ddR(k,1) * m_control_points[local_cp_ids(b,c)].getZ();
+
+				dQdudv[0] += ddR(k,2) * m_control_points[local_cp_ids(b,c)].getX();
+				dQdudv[1] += ddR(k,2) * m_control_points[local_cp_ids(b,c)].getY();
+				dQdudv[2] += ddR(k,2) * m_control_points[local_cp_ids(b,c)].getZ();
+
+				k++;
+			}
+		}
+
+		H(0,0) = std::inner_product( dQdudu.begin(), dQdudu.end(),  QminP.begin(), 0);
+		H(0,1) = std::inner_product( dQdudv.begin(), dQdudv.end(),  QminP.begin(), 0);
+		H(1,0) = std::inner_product( dQdudv.begin(), dQdudv.end(),  QminP.begin(), 0);
+		H(1,1) = std::inner_product( dQdvdv.begin(), dQdvdv.end(),  QminP.begin(), 0);
+
+
+		Gradient[0] = std::inner_product( dQdu.begin(), dQdu.end(),  QminP.begin(), 0);
+		Gradient[1] = std::inner_product( dQdv.begin(), dQdv.end(),  QminP.begin(), 0);
+//		for (int c=0;c<=m_q;c++)
+//		{
+//			for (int b=0;b<=m_p;b++)
+//			{
+//				// the control point vector is filled up by first going over u, then over v
+//				int ui = find_Knot_Span(m_knot_vector_u,u,m_p,m_n_u)-m_p+b;
+//				int vi = find_Knot_Span(m_knot_vector_v,v,m_q,m_n_v)-m_q+c;
+//				int control_point_index =vi*m_n_u + ui;
+//
+//				// Store control point Id in corresponding matrix
+//				local_cp_ids(b,c) = m_control_points[control_point_index].getLocalId();
+//			}
+//		}
+
+	}
 	// --------------------------------------------------------------------------
 	DoubleVector& get_knot_vector_u()
 	{
@@ -942,6 +1008,16 @@ public:
 	/// Print object's data.
 	virtual void PrintData(std::ostream &rOStream) const
 	{
+	}
+
+	int get_m_p()
+	{
+		return m_p;
+	}
+
+	int get_m_q()
+	{
+		return m_q;
 	}
 
 
